@@ -13,8 +13,8 @@ ANYWAY, the final dictionary and lexicon is pretty much solely a result of that 
 The AI did not generate text for the dictionaries. To my knowledge, the dictionaries are human-written. It just aggregated them from existing sources, though I won't make any claims to be knowledgeable about what the folks maintaining these dictionaries are doing upstream.
 
 GS NOTES\
-AI's on the rise, and you might be prepared to audit 7000 lines of Artificial 'Intelligence' slop.\
-BUT IT IS NO MATCH FOR 7000 LINES OF MY GENUINE STUPIDITY!\
+AI's on the rise, and you might be prepared to audit 3000 lines of Artificial 'Intelligence' slop.\
+BUT IT IS NO MATCH FOR 3000 LINES OF MY GENUINE STUPIDITY!\
 CURSE OF IMGUI BE UPON ME, BLESSING OF IMRAII BE UPON YE!
 
 THIS README WAS ALSO NOT WRITTEN BY AI.\
