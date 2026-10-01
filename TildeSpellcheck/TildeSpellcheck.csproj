@@ -10,14 +10,6 @@
     <OutputPath>$(MSBuildProjectDirectory)\..\build\TildeTools</OutputPath>
   </PropertyGroup>
 
-  <!-- C2's SQLite brings its native library for every platform, and the game only ever loads win-x64's, so I threw all the others out. -->
-  <Target Name="DropOtherRuntimes" AfterTargets="Build" BeforeTargets="DefaultDalamudPackagerRelease;DefaultDalamudPackagerDebug" Condition="Exists('$(TargetDir)runtimes')">
-    <ItemGroup>
-      <RuntimeFolder Include="$([System.IO.Directory]::GetDirectories('$(TargetDir)runtimes'))" />
-    </ItemGroup>
-    <RemoveDir Directories="@(RuntimeFolder)" Condition="'%(Filename)' != 'win-x64'" />
-  </Target>
-
   <!--
     The spellchecker's dictionaries in Hunspell's affix format, shipped so it works the same everywhere.
     en_US is SCOWL's, with COPYRIGHT-SCOWL.txt beside it as its licence asks
@@ -35,11 +27,6 @@
   -->
   <ItemGroup>
     <Content Include="Lexicon\**" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
-  <!-- My C2 and XIM settings, see ShippedSetup -->
-  <ItemGroup>
-    <EmbeddedResource Include="Defaults\*.json" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -58,71 +58,13 @@ internal static partial class ChannelCommands
         Channels = channels;
     }
 
-    internal static string? NameOf(string header) => header.Length > 1 && header[0] == '/' ? Channels.GetValueOrDefault(header[1..]) : null;
-
-    // The key the send queue keeps order within, "" for the active channel.
-    // Every tell gets Tell, whoever it's to, because Name and Name@World can be the same person.
-    internal static string KeyOf(string header) => NameOf(header) ?? (header.Length > 0 ? Tell : "");
-
-    // "" is whichever channel the box is on, and a /r goes to someone's tells.
-    internal static bool MightShare(string a, string b) =>
-        a == b || a.Length == 0 || b.Length == 0 || a is Tell or Reply && b is Tell or Reply;
-
     // 0x02/0x03 frame links and auto-translate phrases.
     internal static bool HasPayload(string line) => line.AsSpan().ContainsAny('\x02', '\x03');
-
-    // The game's "not heard" notice only names /tell, /say, /yell and /shout, so these probably don't share the wait.
-    // Emote drops lines with no feedback, a macro of 15 /em lines only posted ~3 of them with no warning.
-    // Novice network and "" wait along with those until shown otherwise.
-    internal static bool Unlimited(string key) =>
-        key is "Free Company" or Party or Alliance or "PvP Team" or "Echo" || key.Contains(Linkshell);
 
     // A /t or /tell, whether or not its target reads as a name.
     internal static bool IsTell(string line) =>
         CommandRegex().Match(line) is { Success: true } match && Channels.GetValueOrDefault(match.Groups["cmd"].Value) == Tell;
 
-    [GeneratedRegex(@"^\s*(?<target>[\p{L}'\-]+\s+[\p{L}'\-]+(?:@[\p{L}]+)?)\s+(?<rest>.*)$",
-        RegexOptions.Singleline)]
-    private static partial Regex TellTargetRegex();
-
     [GeneratedRegex(@"^/(?<cmd>\p{L}+[0-9]*)(?:\s+(?<rest>.*))?$", RegexOptions.Singleline)]
     private static partial Regex CommandRegex();
-
-    internal static bool TrySplittable(string line, out string header, out string body)
-    {
-        header = string.Empty;
-        body = string.Empty;
-
-        if (string.IsNullOrWhiteSpace(line))
-            return false;
-
-        if (line[0] != '/')
-        {
-            body = line;
-            return true;
-        }
-
-        var match = CommandRegex().Match(line);
-        if (!match.Success)
-            return false;
-
-        var command = match.Groups["cmd"].Value;
-        var rest = match.Groups["rest"].Value;
-
-        var name = Channels.GetValueOrDefault(command);
-        if (name == Tell)
-        {
-            var tell = TellTargetRegex().Match(rest);
-            if (!tell.Success)
-                return false;
-
-            (command, rest) = ($"{command} {tell.Groups["target"].Value}", tell.Groups["rest"].Value);
-        }
-        else if (name == null)
-            return false;
-
-        header = $"/{command}";
-        body = rest;
-        return body.Length > 0;
-    }
 }

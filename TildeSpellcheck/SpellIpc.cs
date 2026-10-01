@@ -8,10 +8,8 @@ using Stamp = (int Generation, bool Hyphen, int Suggestions);
 
 namespace TildeTools.Modules.Spelling;
 
-// Asked by C2, XIM and WS over IPC, and called directly for the default chatbox.
 internal sealed class SpellIpc : IDisposable
 {
-    private const int ApiVersion = 6;
     private const string Prefix = "TildeTools.Spell.";
 
     private readonly SpellingSettings _settings;
@@ -19,47 +17,17 @@ internal sealed class SpellIpc : IDisposable
     private readonly string _lexicon;
     private readonly Action<string, string, Action<string>?> _openDefine;
 
-    private readonly ICallGateProvider<int> _apiVersion = Svc.Pi.GetIpcProvider<int>($"{Prefix}ApiVersion");
-    private readonly ICallGateProvider<string, List<int>> _check = Svc.Pi.GetIpcProvider<string, List<int>>($"{Prefix}Check");
-    private readonly ICallGateProvider<string, int, List<string>> _suggestNow = Svc.Pi.GetIpcProvider<string, int, List<string>>($"{Prefix}SuggestNow");
-    private readonly ICallGateProvider<string, bool> _isWord = Svc.Pi.GetIpcProvider<string, bool>($"{Prefix}IsWord");
-    private readonly ICallGateProvider<string, bool> _addToDictionary = Svc.Pi.GetIpcProvider<string, bool>($"{Prefix}AddToDictionary");
-    private readonly ICallGateProvider<string, int, List<int>> _wordAt = Svc.Pi.GetIpcProvider<string, int, List<int>>($"{Prefix}WordAt");
-    private readonly ICallGateProvider<string, bool> _define = Svc.Pi.GetIpcProvider<string, bool>($"{Prefix}Define");
-    private readonly ICallGateProvider<bool> _lookup = Svc.Pi.GetIpcProvider<bool>($"{Prefix}Lookup");
-    private readonly ICallGateProvider<string, string, bool, Action<string>, bool> _drawMenu = Svc.Pi.GetIpcProvider<string, string, bool, Action<string>, bool>($"{Prefix}DrawMenu");
     private readonly ICallGateProvider<object?> _available = Svc.Pi.GetIpcProvider<object?>($"{Prefix}Available");
 
     internal SpellMenu Menu { get; }
 
-    internal SpellIpc(SpellingSettings settings, Action save, string lexicon, Action<string, string, Action<string>?> define, Action lookup)
+    internal SpellIpc(SpellingSettings settings, Action save, string lexicon, Action<string, string, Action<string>?> define)
     {
         _settings = settings;
         _save = save;
         _lexicon = lexicon;
         _openDefine = define;
         Menu = new SpellMenu(this);
-
-        _apiVersion.RegisterFunc(() => ApiVersion);
-        _check.RegisterFunc(Check);
-        // WS asks with 0, A.K.A. the Spelling tab's count.
-        _suggestNow.RegisterFunc((word, most) => Lookup(word, most > 0 ? most : _settings.MaximumSuggestions));
-        _isWord.RegisterFunc(word => !Speller.Loaded || Speller.IsWord(word));
-        _addToDictionary.RegisterFunc(AddToDictionary);
-        _wordAt.RegisterFunc((text, index) => WordAt(text, index) is var (start, length) ? [start, length] : []);
-        _define.RegisterFunc(word => Define(word, word, null));
-        _lookup.RegisterFunc(() =>
-        {
-            lookup();
-            return true;
-        });
-
-        // Drawn into the caller's popup. Every plugin share draws into Dalamud's ImGui context, so, IPC.
-        _drawMenu.RegisterFunc((id, word, misspelled, replace) =>
-        {
-            SpellMenu.KeepOnScreen();
-            return Menu.Draw(id, word, misspelled, replace);
-        });
 
         _available.SendMessage();
         Svc.Pi.UiBuilder.Draw += Announce;
@@ -114,21 +82,6 @@ internal sealed class SpellIpc : IDisposable
         }
 
         return end;
-    }
-
-    // Flat start/length pairs, because only framework types can cross between plugins.
-    private List<int> Check(string text)
-    {
-        var marks = Marks(text);
-
-        List<int> flat = new(marks.Count * 2);
-        foreach (var (index, length) in marks)
-        {
-            flat.Add(index);
-            flat.Add(length);
-        }
-
-        return flat;
     }
 
     // A cut between words changes nothing since SpellCheck checks each word alone.
@@ -189,7 +142,6 @@ internal sealed class SpellIpc : IDisposable
 
     private const int SegmentLength = 256;
 
-    // MaxUnlockBytes' 32000 is ~125 segments and its split parts are another ~125, so 4096 holds ~16 of both.
     // DropStale empties the lot when full.
     private const int MostSegments = 4096;
 
@@ -272,7 +224,6 @@ internal sealed class SpellIpc : IDisposable
         return true;
     }
 
-    // A Func, not an action, as every IPC caller uses InvokeFunc
     internal bool Define(string word, string original, Action<string>? use)
     {
         _openDefine(word, original, use);
@@ -295,10 +246,5 @@ internal sealed class SpellIpc : IDisposable
     public void Dispose()
     {
         Svc.Pi.UiBuilder.Draw -= Announce;
-        foreach (var gate in new ICallGateProvider[] { _apiVersion, _check, _suggestNow, _isWord, _addToDictionary, _wordAt, _define, _lookup, _drawMenu })
-            gate.UnregisterFunc();
-
-        // After unregistering, so the boxes find the gates gone and drop their marks.
-        _available.SendMessage();
     }
 }

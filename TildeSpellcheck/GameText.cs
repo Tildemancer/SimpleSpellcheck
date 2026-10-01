@@ -224,10 +224,6 @@ internal static class GameText
     private static bool OpensSentence(ReadOnlySpan<char> text, int at) =>
         text[..at].TrimEnd(Openers) is var before && (before.IsEmpty || before[^1] is '.' or '!' or '?' or '…' or ':');
 
-    // A hyphenated word, and its composite parts get taken on their own.
-    internal static IEnumerable<string> WithHalves(string word) =>
-        word.Contains('-') ? word.Split('-', StringSplitOptions.RemoveEmptyEntries).Prepend(word) : [word];
-
     internal static bool IsWordChar(char c) => char.IsLetter(c) || c is '\'' or '’' or '-';
 
     // All capitals probably means one of the game's labels (VOICEMAN, BATTLETALK)

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 
@@ -22,7 +21,6 @@ internal sealed class SpellMenu(SpellIpc ipc)
     // True once it's done with the word and its been defined, added, ignored or replaced.
     internal bool Draw(string id, string word, bool misspelled, Action<string> replace)
     {
-        // Each XIM window and C2 pop-out counts its menus from 1. IDs all repeat.
         if (!_shown.TryGetValue(id, out var shown) || shown.Word != word)
         {
             if (_shown.Count >= 8)
@@ -97,16 +95,5 @@ internal sealed class SpellMenu(SpellIpc ipc)
             }
 
         return false;
-    }
-
-    // ImGui only keeps its popups on screen as it opens, and corrections arrive later and make the menu taller, so this pushes it back inside the screen every frame.
-    internal static void KeepOnScreen()
-    {
-        var screen = ImGui.GetWindowViewport();
-        var at = ImGui.GetWindowPos();
-        var fit = Vector2.Clamp(at, screen.WorkPos, Vector2.Max(screen.WorkPos, screen.WorkPos + screen.WorkSize - ImGui.GetWindowSize()));
-
-        if (fit != at)
-            ImGui.SetWindowPos(fit);
     }
 }

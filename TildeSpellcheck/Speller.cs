@@ -28,11 +28,9 @@ internal static class Speller
 
     // Names, both the ones from Lumina and people's, are accepted but never officially corrections. Rank offers them to finish a capitalized word though.
     private static readonly HashSet<string> _gameNames = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly HashSet<string> _people = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly HashSet<string> _offered = new(StringComparer.OrdinalIgnoreCase);
 
     // Sorted OrdinalIgnoreCase, for Starting: the game's names sort once they're in, the people offered as they change.
-    private static string[] _gameSorted = [], _offeredSorted = [], _roots = [];
+    private static string[] _gameSorted = [], _roots = [];
 
     private static readonly HashSet<string> _inserted = new(StringComparer.Ordinal);
 
@@ -131,14 +129,12 @@ internal static class Speller
     {
         using (Writing())
         {
-            (_primary, _alternate, _us, _gameSorted, _offeredSorted, _roots) = (null, null, null, [], [], []);
+            (_primary, _alternate, _us, _gameSorted, _roots) = (null, null, null, [], []);
             _custom.Clear();
             _game.Clear();
             _gameNames.Clear();
             _ignored.Clear();
             _accepted.Clear();
-            _people.Clear();
-            _offered.Clear();
             _inserted.Clear();
             Generation++;
             _loadToken++;
@@ -162,7 +158,7 @@ internal static class Speller
 
     // No lock, caller holds _sync. preconditional so several of the checks see the same lists.
     private static bool Known(string word) =>
-        _custom.Contains(word) || _game.Contains(word) || _people.Contains(word) || _ignored.Contains(word) || _accepted.Contains(word) || In(_primary, word) || In(_alternate, word);
+        _custom.Contains(word) || _game.Contains(word) || _ignored.Contains(word) || _accepted.Contains(word) || In(_primary, word) || In(_alternate, word);
 
     // Checked as it's typed and THEN normalized to lowercase, so "Paris" passes and "paris" doesn't.
     private static bool In(WordList? list, string word) =>
@@ -263,25 +259,6 @@ internal static class Speller
         return true;
     }
 
-    internal static void SetPeople(IEnumerable<string> offered, IEnumerable<string> accepted)
-    {
-        static HashSet<string> Names(IEnumerable<string> names) => new(names, StringComparer.OrdinalIgnoreCase);
-        var (offering, wanted) = (Names(offered), Names(offered.Concat(accepted)));
-
-        using (Writing())
-        {
-            if (wanted.SetEquals(_people) && offering.SetEquals(_offered))
-                return;
-
-            _people.Clear();
-            _people.UnionWith(wanted);
-            _offered.Clear();
-            _offered.UnionWith(offering);
-            _offeredSorted = [.. _offered.Order(StringComparer.OrdinalIgnoreCase)];
-            Generation++;
-        }
-    }
-
     // Caller holds _sync!
     // Never a duplicate, or removing it later would take the real word too.
     // into: where it's recorded as added, so it can come out again.
@@ -311,7 +288,7 @@ internal static class Speller
         // A name only when it's plainly what's being typed.
         // It must be capitalized, four letters or more into the word, and no dictionary word starts the same way.
         // "Gridan" is Gridania, but "Thes" could be "these"
-        var names = word.Length >= 4 && char.IsUpper(word[0]) && !Starting(_roots, word).Any() ? Starting(_offeredSorted, word).Concat(Starting(_gameSorted, word)).Distinct(StringComparer.OrdinalIgnoreCase).Take(3) : [];
+        var names = word.Length >= 4 && char.IsUpper(word[0]) && !Starting(_roots, word).Any() ? Starting(_gameSorted, word).Take(3) : [];
 
         // The alternate list has no game words added, so it puts a dictionary word before a game one.
         return [.. names.Concat(merged.Where(s => !Dropped(s))
@@ -363,7 +340,7 @@ internal static class Speller
         if (word.Split(' ', '-') is { Length: > 1 } parts)
             return parts.All(Common);
 
-        return _game.Contains(word) || _people.Contains(word) || _custom.Contains(word)
+        return _game.Contains(word) || _custom.Contains(word)
             || _us!.Check(word) || Spellings.Any(s => word.IndexOf(s.British, StringComparison.OrdinalIgnoreCase) is var at and >= 0
                 && _us!.Check(word[..at] + s.American + word[(at + s.British.Length)..]));
     }

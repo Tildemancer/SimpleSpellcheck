@@ -17,19 +17,4 @@ public sealed class SpellingSettings
     public List<string> CustomWords { get; set; } = [];
 
     public bool LookUpOnline { get; set; } = true;
-
-    public bool LearnPlayerNames { get; set; } = true;
-
-    public bool SuggestPlayerNames { get; set; } = true;
-
-    public const int MostTellPartnerDays = 365;
-
-    public int TellPartnerDays { get; set => field = Math.Clamp(value, 1, MostTellPartnerDays); } = 30;
-
-    // A real network request made on your behalf. DANGER!
-    // Todo: CRITICAL >>>>>>> THIS WILL NOT PASS DALAMUD PAC <<<<<<<<<<
-    // I will be removing this before even submitting it to the main repo, so don't panic if you're auditing this. I'm just really lazy
-    public bool RequestCompanyRoster { get; set; }
-
-    public bool ImportedWordsmith { get; set; }
 }
