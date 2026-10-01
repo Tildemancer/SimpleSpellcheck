@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Lumina.Excel.Sheets;
@@ -10,12 +12,15 @@ namespace TildeSpellcheck;
 
 public sealed class Plugin : IDalamudPlugin
 {
+    private static readonly string[] CommandNames = ["/spelling", "/spell", "/tspell", "/tspelling"];
+
     private readonly Configuration _config;
     private readonly WindowSystem _windows = new("TildeSpellcheck");
     private readonly DefineWindow _define;
     private readonly Spelling _spelling;
     private readonly NativeChatSpelling _native;
     private readonly SettingsWindow _settings;
+    private readonly List<string> _commands = [];
 
     private static string Dictionaries => Path.Combine(Svc.Pi.AssemblyLocation.DirectoryName!, "Dictionaries");
 
@@ -48,9 +53,35 @@ public sealed class Plugin : IDalamudPlugin
         Svc.Pi.UiBuilder.Draw += _windows.Draw;
         Svc.Pi.UiBuilder.OpenConfigUi += _settings.Toggle;
         Svc.Pi.UiBuilder.OpenMainUi += _define.OpenSearch;
+
+        foreach (var name in CommandNames)
+        {
+            var info = new CommandInfo(OnCommand)
+            {
+                HelpMessage = "Open TildeSpellcheck\n/spelling define - Look a word up\n/spelling define <word> - Define that word",
+                ShowInHelp = name == CommandNames[0],
+            };
+
+            if (Svc.Commands.AddHandler(name, info))
+                _commands.Add(name);
+            else
+                Svc.Log.Warning($"{name} is already another plugin's command.");
+        }
     }
 
     private void Save() => Svc.Pi.SavePluginConfig(_config);
+
+    private void OnCommand(string command, string args)
+    {
+        var parts = args.Trim().Split(' ', 2, StringSplitOptions.TrimEntries);
+
+        if (!parts[0].Equals("define", StringComparison.OrdinalIgnoreCase))
+            _settings.Toggle();
+        else if (parts is [_, { Length: > 0 } word])
+            _define.Open(word, word, null);
+        else
+            _define.OpenSearch();
+    }
 
     private async Task Load()
     {
@@ -69,6 +100,9 @@ public sealed class Plugin : IDalamudPlugin
 
     public void Dispose()
     {
+        foreach (var name in _commands)
+            Svc.Commands.RemoveHandler(name);
+
         Svc.Pi.UiBuilder.Draw -= _native.Draw;
         Svc.Pi.UiBuilder.Draw -= _windows.Draw;
         Svc.Pi.UiBuilder.OpenConfigUi -= _settings.Toggle;
