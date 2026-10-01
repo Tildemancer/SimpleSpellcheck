@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
 // This comes from chat.txt, so no Wiktionary credits here.
 internal readonly record struct Sense(string Word, string Pos, string Gloss, bool Own = false);

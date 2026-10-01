@@ -1,13 +1,13 @@
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
 
   <PropertyGroup>
-    <Version>0.5.2</Version>
+    <Version>0.1.0</Version>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>x64</Platforms>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(MSBuildProjectDirectory)\..\build\TildeTools</OutputPath>
+    <OutputPath>$(MSBuildProjectDirectory)\..\build\TildeSpellcheck</OutputPath>
   </PropertyGroup>
 
   <!--
@@ -31,11 +31,10 @@
 
   <PropertyGroup>
     <Author>Tildemancer</Author>
-    <Name>TildeTools</Name>
-    <Punchline>A box of small tools, each switched on or off on its own.</Punchline>
-    <Description>A collection of tools under one window, each with its own tab and master switch. Includes Emote Splitter, which raises the chat box's length limit and sends long messages as paced parts so the server does not drop them, and spellcheck.</Description>
+    <Name>TildeSpellcheck</Name>
+    <Punchline>Spellcheck for the chat box.</Punchline>
+    <Description>Underlines misspellings in the chat box, with corrections on right-click. It knows the game's words. Right-click any word to define it or find its synonyms.</Description>
     <Tags>Social;Utility;Roleplay</Tags>
-    <IconUrl>https://raw.githubusercontent.com/Tildemancer/TildeTools/master/TildeTools/images/icon.png</IconUrl>
   </PropertyGroup>
 
 </Project>

@@ -3,37 +3,32 @@ using System.Collections.Generic;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
-// The spelling menu's entries, drawn into whichever menu hosts them, be that the game's chat box or C2's and XIM's windows over IPC.
+// The spelling menu's entries, drawn into the editbox menu.
 // Kept by menu id and word, so a menu's synonyms and corrections are asked for once.
-internal sealed class SpellMenu(SpellIpc ipc)
+internal sealed class SpellMenu(Spelling spelling)
 {
-    private sealed class Shown(string word)
+    private sealed class Shown(int id, string word)
     {
+        internal readonly int Id = id;
         internal readonly string Word = word;
         internal List<string>? Synonyms, Corrections;
     }
 
-    // One per menu opened, emptied at 8.
-    private readonly Dictionary<string, Shown> _shown = [];
+    private Shown? _shown;
 
     // True once it's done with the word and its been defined, added, ignored or replaced.
-    internal bool Draw(string id, string word, bool misspelled, Action<string> replace)
+    internal bool Draw(int id, string word, bool misspelled, Action<string> replace)
     {
-        if (!_shown.TryGetValue(id, out var shown) || shown.Word != word)
-        {
-            if (_shown.Count >= 8)
-                _shown.Clear();
-
-            _shown[id] = shown = new(word);
-        }
+        if (_shown is not { } shown || shown.Id != id || shown.Word != word)
+            _shown = shown = new(id, word);
 
         ImGui.TextDisabled(word);
 
         // ##entry keeps an entry's id apart from a correction's, so you can correct 'defin' to 'Define' without tainting.
         if (ImGui.Selectable("Synonyms##entry", false, ImGuiSelectableFlags.DontClosePopups))
-            shown.Synonyms = shown.Synonyms is null ? ipc.Synonyms(word) : null;
+            shown.Synonyms = shown.Synonyms is null ? spelling.Synonyms(word) : null;
 
         if (shown.Synonyms is not null)
         {
@@ -47,14 +42,14 @@ internal sealed class SpellMenu(SpellIpc ipc)
             foreach (var synonym in shown.Synonyms)
                 if (ImGui.Selectable(synonym))
                 {
-                    ipc.Define(synonym, word, replace);
+                    spelling.Define(synonym, word, replace);
                     return true;
                 }
         }
 
         if (ImGui.Selectable("Define##entry"))
         {
-            ipc.Define(word, word, replace);
+            spelling.Define(word, word, replace);
             return true;
         }
 
@@ -65,7 +60,7 @@ internal sealed class SpellMenu(SpellIpc ipc)
 
         if (ImGui.Selectable("Add to dictionary##entry"))
         {
-            ipc.AddToDictionary(word);
+            spelling.AddToDictionary(word);
             return true;
         }
 
@@ -75,7 +70,7 @@ internal sealed class SpellMenu(SpellIpc ipc)
             return true;
         }
 
-        var corrections = shown.Corrections ??= ipc.Suggest(word);
+        var corrections = shown.Corrections ??= spelling.Suggest(word);
         if (corrections is { Count: 0 })
             return false;
 

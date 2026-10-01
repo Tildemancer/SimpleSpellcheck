@@ -2,7 +2,7 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
-namespace TildeTools;
+namespace TildeSpellcheck;
 
 internal sealed class Svc
 {

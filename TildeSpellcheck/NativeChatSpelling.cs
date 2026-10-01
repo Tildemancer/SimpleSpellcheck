@@ -9,12 +9,10 @@ using Dalamud.Interface.Windowing;
 
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using TildeTools.Modules.EmoteSplitter.Chat;
 
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
-// Spelling's module, null while off.
-internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
+internal sealed unsafe class NativeChatSpelling(Spelling spelling)
 {
     // ABGR: red
     private const uint Colour = 0xFF4040FFu;
@@ -41,9 +39,8 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
     private int _caretAtOpen = -1;
     private bool _pendingMisspelled;
     // Set as the menu opens, so replace isn't made every frame.
-    // SpellMenu keeps each id's synonyms and corrections.
-    private string _menuId = string.Empty;
-    private int _menusOpened;
+    // A new id each time so a reopened menu doesn't keep the last one's synonyms and corrections
+    private int _menuId;
     private Action<string> _replace = _ => { };
 
     private const int FailuresAllowed = 10;
@@ -107,7 +104,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
                 return;
             }
 
-        if (index >= 0 && speller()?.WordAt(text, index) is var (word, wordLength))
+        if (index >= 0 && spelling.WordAt(text, index) is var (word, wordLength))
             OpenMenuOn(text, word, wordLength, misspelled: false);
         else
             _pendingWord = string.Empty;
@@ -130,7 +127,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
                 break;
             }
 
-        if (start < 0 && (speller()?.WordAt(text, caret) ?? speller()?.WordAt(text, caret - 1)) is var (at, size))
+        if (start < 0 && (spelling.WordAt(text, caret) ?? spelling.WordAt(text, caret - 1)) is var (at, size))
             (start, length, misspelled) = (at, size, false);
 
         if (OpenMenuOn(text, start, length, misspelled))
@@ -168,7 +165,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
 
         var word = text.Substring(start, length);
         (_pendingWord, _pendingMisspelled, _menuShowing, _menuAt) = (word, misspelled, true, PointerPosition());
-        (_menuId, _replace) = ($"game {++_menusOpened}", replacement => Replace(word, replacement, start));
+        (_menuId, _replace) = (_menuId + 1, replacement => Replace(word, replacement, start));
         _caretAtOpen = _caretLastFrame;
         _clickHeld = Down(LeftButton) || Down(RightButton);
         return true;
@@ -180,7 +177,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
 
         // Windows answers for the whole machine, so every key and click check is gated on this.
         // This reminds me I'm going to need to get someone on Linux to make sure Wine handles this the same...
-        if (_off || speller() == null || !Dalamud.Utility.Util.ApplicationIsActivated())
+        if (_off || !Dalamud.Utility.Util.ApplicationIsActivated())
             return;
 
         try
@@ -203,7 +200,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
             _off = true;
             Svc.Log.Error(ex, "Marking the game's chat box failed repeatedly; it is now off.");
             Svc.Chat.Print(
-                "[TildeTools] Spellchecking the game's chat box has switched itself off after " +
+                "[TildeSpellcheck] Spellchecking the game's chat box has switched itself off after " +
                 "repeated errors. Reload the plugin to try again; /xllog has the detail.");
         }
     }
@@ -264,7 +261,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
     private (float X, float Y, float W, float H) _rect;
     private float _scroll;
 
-    // The box holds up to UnlockedMaxBytes, which is way too many to decode every frame.
+    // Decodes only when the bytes change so it doesn't have to run every frame.
     private string TextOf(AtkComponentTextInput* input)
     {
         var raw = input->RawString.AsSpan();
@@ -308,7 +305,8 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
         }
     }
 
-    // SpellIpc.Marks come in text order, so their widths do as well.
+    // Spelling.Marks come in text order, ergo their widths do too.
+    // Posterity; former ipc
     private int FirstShowing(string text, List<(int Start, int Length)> marks)
     {
         var (low, high) = (0, marks.Count);
@@ -368,7 +366,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
         private readonly NativeChatSpelling _owner;
 
         internal MenuWindow(NativeChatSpelling owner)
-            : base("##tildetools-native-spelling",
+            : base("##tildespellcheck-native-spelling",
                 ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoNav)
         {
             _owner = owner;
@@ -394,7 +392,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
 
     private void DrawMenuItems()
     {
-        if (speller()?.Menu.Draw(_menuId, _pendingWord, _pendingMisspelled, _replace) == true)
+        if (spelling.Menu.Draw(_menuId, _pendingWord, _pendingMisspelled, _replace))
             Forget();
     }
 
@@ -417,7 +415,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
     // I HATE this game's native UI elements!
     private void Replace(string word, string replacement, int at)
     {
-        var input = ChatSender.ChatLogInput();
+        var input = MeasurableInput();
         if (input == null)
             return;
 
@@ -473,9 +471,11 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
     private float ScrollOffset(AtkResNode* caret, string text, int cursor) =>
         Math.Max(0f, Width(text, Math.Min(cursor, text.Length)) - (ScreenRect(caret).X - _rect.X));
 
+    // TODO: Pieces only matter once another plugin raises the box past the game's 500 bytes, as TT does upstream
     // GetTextDrawSize's width is a ushort, and 32000 characters run past 200,000 px
     // So a piece is...at most:
     // 2 * PieceChars - 1 = 511 characters, under 65,535 px while glyphs are under 128 px
+    // I'll fix this later I swear :pensive:
     private const int PieceChars = 256;
 
     private float Width(string text, int length)
@@ -524,7 +524,7 @@ internal sealed unsafe class NativeChatSpelling(Func<SpellIpc?> speller)
     private List<(int Start, int Length)> Check(string text)
     {
         if (text != _lastText)
-            (_lastText, _lastMarks) = (text, speller()?.Marks(text) ?? []);
+            (_lastText, _lastMarks) = (text, spelling.Marks(text));
 
         return _lastMarks;
     }

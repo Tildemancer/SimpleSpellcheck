@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using Dalamud.Configuration;
 
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
 [Serializable]
-public sealed class SpellingSettings
+public sealed class Configuration : IPluginConfiguration
 {
+    public int Version { get; set; }
+
     public bool British { get; set; }
 
     public const int MostSuggestions = 10;

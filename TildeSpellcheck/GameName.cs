@@ -1,4 +1,4 @@
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
 // In rank order: a word that's part of several names says the highest.
 internal enum NameKind { Other, Creator, Place, Npc }

@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WeCantSpell.Hunspell;
 
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
 // All under _sync, filled from background threads while the boxes check on the draw thread.
 internal static class Speller
@@ -26,10 +26,11 @@ internal static class Speller
     // chat.txt's terms are accepted but never suggested.
     private static readonly HashSet<string> _accepted = new(StringComparer.OrdinalIgnoreCase);
 
-    // Names, both the ones from Lumina and people's, are accepted but never officially corrections. Rank offers them to finish a capitalized word though.
+    // The game's names are accepted but never officially corrections.
+    // Rank offers them to finish a capitalized word though.
     private static readonly HashSet<string> _gameNames = new(StringComparer.OrdinalIgnoreCase);
 
-    // Sorted OrdinalIgnoreCase, for Starting: the game's names sort once they're in, the people offered as they change.
+    // Sorted OrdinalIgnoreCase, for Starting: the game's names sort once they're in.
     private static string[] _gameSorted = [], _roots = [];
 
     private static readonly HashSet<string> _inserted = new(StringComparer.Ordinal);

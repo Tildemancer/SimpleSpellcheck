@@ -10,10 +10,10 @@ using Lumina.Data.Files.Excel;
 using Lumina.Data.Structs.Excel;
 using Lumina.Extensions;
 using Lumina.Text.ReadOnly;
-using Origins = System.Collections.Generic.Dictionary<string, TildeTools.Modules.Spelling.GameName>.AlternateLookup<System.ReadOnlySpan<char>>;
+using Origins = System.Collections.Generic.Dictionary<string, TildeSpellcheck.GameName>.AlternateLookup<System.ReadOnlySpan<char>>;
 using Seen = System.Collections.Generic.Dictionary<string, (int Count, int Shortest, int Proper, int Lower)>.AlternateLookup<System.ReadOnlySpan<char>>;
 
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
 // Names are considered to be "words the game capitalizes where a capital means something and hardly ever lowercases", and whole names for a phrase looked up.
 internal readonly record struct GameWords(List<string> Words, Dictionary<string, GameName> Names);
@@ -179,7 +179,7 @@ internal static class GameText
             var token = span[range].Trim(Trimmed);
             var meaningful = label || origin is not null || !OpensSentence(span, range.Start.GetOffset(span.Length));
 
-            // As WithHalves, only a first half opens a sentence.
+            // Only a first half opens a sentence.
             Learn(token, meaningful);
 
             if (token.Contains('-'))

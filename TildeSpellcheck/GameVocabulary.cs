@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
 internal static class GameVocabulary
 {

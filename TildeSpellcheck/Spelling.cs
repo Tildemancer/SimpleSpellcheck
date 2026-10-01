@@ -2,26 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dalamud.Plugin.Ipc;
-using TildeTools.Modules.EmoteSplitter.Chat;
 using Stamp = (int Generation, bool Hyphen, int Suggestions);
 
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
-internal sealed class SpellIpc : IDisposable
+internal sealed class Spelling : IDisposable
 {
-    private const string Prefix = "TildeTools.Spell.";
-
-    private readonly SpellingSettings _settings;
+    private readonly Configuration _settings;
     private readonly Action _save;
     private readonly string _lexicon;
     private readonly Action<string, string, Action<string>?> _openDefine;
 
-    private readonly ICallGateProvider<object?> _available = Svc.Pi.GetIpcProvider<object?>($"{Prefix}Available");
-
     internal SpellMenu Menu { get; }
 
-    internal SpellIpc(SpellingSettings settings, Action save, string lexicon, Action<string, string, Action<string>?> define)
+    internal event Action? Changed;
+
+    internal Spelling(Configuration settings, Action save, string lexicon, Action<string, string, Action<string>?> define)
     {
         _settings = settings;
         _save = save;
@@ -29,21 +25,20 @@ internal sealed class SpellIpc : IDisposable
         _openDefine = define;
         Menu = new SpellMenu(this);
 
-        _available.SendMessage();
         Svc.Pi.UiBuilder.Draw += Announce;
     }
 
     private Stamp _announced;
 
-    // The boxes drop their cached marks on Available.
-    // Sent from gamethread Draw where they read those caches.
+    // The chatbox drops its cached marks on Changed.
+    // Sent from gamethread Draw where it reads those caches.
     private void Announce()
     {
         if (Current == _announced)
             return;
 
         _announced = Current;
-        _available.SendMessage();
+        Changed?.Invoke();
     }
 
     private static int UnfinishedWordAt(string text)
@@ -142,8 +137,9 @@ internal sealed class SpellIpc : IDisposable
 
     private const int SegmentLength = 256;
 
+    // Room for two 32,000-byte lines of ~125 segments, for a box a plugin like Emote Splitter has raised
     // DropStale empties the lot when full.
-    private const int MostSegments = 4096;
+    private const int MostSegments = 256;
 
     private static int SegmentEnd(string text, int start)
     {
@@ -190,7 +186,7 @@ internal sealed class SpellIpc : IDisposable
         }
     }
 
-    // Logged here because the plugins asking swallow a gate's throw.
+    // Never throws so the menu reading its task's Result doesn't either
     private static List<string> Lookup(string word, int most)
     {
         try
@@ -204,14 +200,14 @@ internal sealed class SpellIpc : IDisposable
         }
     }
 
-    // Returns true even when the save throws, because the word is in and the next save keeps it.
-    internal bool AddToDictionary(string word)
+    internal void AddToDictionary(string word)
     {
         if (!Speller.AddWord(word))
-            return false;
+            return;
 
         _settings.CustomWords.Add(word.Trim());
 
+        // A failed save is only logged, the word is in already and the next save writes it
         try
         {
             _save();
@@ -220,15 +216,9 @@ internal sealed class SpellIpc : IDisposable
         {
             Svc.Log.Error(ex, "Saving the added word failed.");
         }
-
-        return true;
     }
 
-    internal bool Define(string word, string original, Action<string>? use)
-    {
-        _openDefine(word, original, use);
-        return true;
-    }
+    internal void Define(string word, string original, Action<string>? use) => _openDefine(word, original, use);
 
     private const int MostSynonyms = 10;
 
@@ -243,8 +233,5 @@ internal sealed class SpellIpc : IDisposable
             .Take(MostSynonyms),
     ];
 
-    public void Dispose()
-    {
-        Svc.Pi.UiBuilder.Draw -= Announce;
-    }
+    public void Dispose() => Svc.Pi.UiBuilder.Draw -= Announce;
 }

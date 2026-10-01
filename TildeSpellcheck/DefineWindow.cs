@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using TildeTools.Ui;
 
-namespace TildeTools.Modules.Spelling;
+namespace TildeSpellcheck;
 
 internal sealed partial class DefineWindow : Window
 {
@@ -26,7 +25,7 @@ internal sealed partial class DefineWindow : Window
     // Missing: the line saying there's no definition
     private readonly record struct Answer(List<Entry> Entries, int[] Closed, string[] Bars, string Missing, string[] Synonyms, string Shut, Named? Name, string Credit);
 
-    private readonly SpellingSettings _settings;
+    private readonly Configuration _settings;
     private readonly string _lexicon;
 
     private string _word = "";
@@ -51,9 +50,9 @@ internal sealed partial class DefineWindow : Window
     // Compared by reference, the keys are the Answer's own strings and stay the same each frame.
     private readonly Dictionary<string, string[]> _words = new(ReferenceEqualityComparer.Instance);
 
-    private const string Id = "###tildetools-define";
+    private const string Id = "###tildespellcheck-define";
 
-    internal DefineWindow(SpellingSettings settings, string lexicon)
+    internal DefineWindow(Configuration settings, string lexicon)
         : base(Id)
     {
         (_settings, _lexicon) = (settings, lexicon);

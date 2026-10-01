@@ -3,59 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace TildeTools.Modules.EmoteSplitter.Chat;
+namespace TildeSpellcheck;
 
 internal static partial class ChannelCommands
 {
-    private static Dictionary<string, string> Channels = new(StringComparer.OrdinalIgnoreCase);
-
-    internal const string Reply = "Reply";
-    internal const string Tell = "Tell";
-    internal const string Party = "Party";
-    internal const string Alliance = "Alliance";
-    internal const string Linkshell = "Linkshell";
-
-    static ChannelCommands()
-    {
-        (string Name, string Aliases)[] named =
-        [
-            ("Say", "say s"), ("Yell", "yell y"), ("Shout", "shout sh"), ("Emote", "emote em me"),
-            (Party, "party p"), (Alliance, "alliance a"), ("Free Company", "freecompany fc"),
-            ("Novice Network", "novice n beginner b"), ("PvP Team", "pvpteam pt"), ("Echo", "echo e"),
-            (Reply, "reply r"), (Tell, "tell t"), ($"Cross-world {Linkshell}", "cwl cwlinkshell"),
-        ];
-
-        foreach (var (name, aliases) in named)
-            Name(name, aliases);
-
-        for (var i = 1; i <= 8; i++)
-        {
-            Name($"{Linkshell} {i}", $"linkshell{i} l{i}");
-            Name($"Cross-world {Linkshell} {i}", $"cwlinkshell{i} cwl{i}");
-        }
-    }
-
-    private static void Name(string name, string aliases)
-    {
-        foreach (var alias in aliases.Split(' '))
-            Channels[alias] = name;
-    }
+    private static HashSet<string> TellNames = new(["tell", "t"], StringComparer.OrdinalIgnoreCase);
 
     // TextCommand sheet rows, where DE or FR clients keep stuff like /sagen and /dire.
     // Filled into a copy so each row only matches the built-in names and not one any earlier rows added.
     internal static void AddClientNames(IEnumerable<IEnumerable<string>> rows)
     {
-        var channels = new Dictionary<string, string>(Channels, StringComparer.OrdinalIgnoreCase);
+        var tells = new HashSet<string>(TellNames, StringComparer.OrdinalIgnoreCase);
 
         foreach (var row in rows)
         {
             var names = row.Select(n => n.TrimStart('/')).Where(n => n.Length > 0).ToList();
-            if (names.FirstOrDefault(Channels.ContainsKey) is { } known)
-                foreach (var name in names)
-                    channels[name] = Channels[known];
+            if (names.Any(TellNames.Contains))
+                tells.UnionWith(names);
         }
 
-        Channels = channels;
+        TellNames = tells;
     }
 
     // 0x02/0x03 frame links and auto-translate phrases.
@@ -63,7 +30,7 @@ internal static partial class ChannelCommands
 
     // A /t or /tell, whether or not its target reads as a name.
     internal static bool IsTell(string line) =>
-        CommandRegex().Match(line) is { Success: true } match && Channels.GetValueOrDefault(match.Groups["cmd"].Value) == Tell;
+        CommandRegex().Match(line) is { Success: true } match && TellNames.Contains(match.Groups["cmd"].Value);
 
     [GeneratedRegex(@"^/(?<cmd>\p{L}+[0-9]*)(?:\s+(?<rest>.*))?$", RegexOptions.Singleline)]
     private static partial Regex CommandRegex();
