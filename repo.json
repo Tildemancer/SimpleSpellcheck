@@ -1,0 +1,28 @@
+[
+  {
+    "Author": "Tildemancer",
+    "Name": "TildeSpellcheck",
+    "InternalName": "TildeSpellcheck",
+    "AssemblyVersion": "0.1.0.0",
+    "Description": "Underlines misspellings in the chat box, with corrections on right-click. It knows the game's words. Right-click any word to define it or find its synonyms.",
+    "Punchline": "Spellcheck for the chat box.",
+    "ApplicableVersion": "any",
+    "Tags": [
+      "Social",
+      "Utility",
+      "Roleplay"
+    ],
+    "DalamudApiLevel": 15,
+    "LoadRequiredState": 0,
+    "LoadSync": false,
+    "CanUnloadAsync": false,
+    "LoadPriority": 0,
+    "AcceptsFeedback": true,
+    "IsHide": false,
+    "IsTestingExclusive": false,
+    "RepoUrl": "https://github.com/Tildemancer/TildeSpellcheck",
+    "DownloadLinkInstall": "https://github.com/Tildemancer/TildeSpellcheck/releases/latest/download/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/Tildemancer/TildeSpellcheck/releases/latest/download/latest.zip",
+    "DownloadLinkTesting": "https://github.com/Tildemancer/TildeSpellcheck/releases/latest/download/latest.zip"
+  }
+]
