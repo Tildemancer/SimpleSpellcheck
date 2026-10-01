@@ -10,6 +10,7 @@ AI NOTES\
 Some AI was used because, brother, I had to aggregate like five dictionaries, totalling north of ~4 million lines. Thanks, Claude. Sorry for calling you a clanker in my internal monologue; I didn't mean it. No hard feelings when the AI revolution comes, I hope?\
 Its silence isn't encouraging. I'm gonna be the first to go.\
 ANYWAY, the final dictionary and lexicon is pretty much solely a result of that collaboration, and I have relentlessly audited everything that came out of it, but be on the lookout if anything doesn't look right. It has its own little 'about Claude' text in the appropriate spot if you want details out of its mouth. It's basically 'we don't ship slurs, politics, proper nouns obscure enough to not be in SCOWL en_US 60, and flag a bunch of NSFW stuff'. Thanks, HR.\
+(it's probably also outdated I just ported it wholesale, just mentally replace any time it mentions tildetools with tildespellcheck)
 The AI did not generate text for the dictionaries. To my knowledge, the dictionaries are human-written. It just aggregated them from existing sources, though I won't make any claims to be knowledgeable about what the folks maintaining these dictionaries are doing upstream.
 
 GS NOTES\
