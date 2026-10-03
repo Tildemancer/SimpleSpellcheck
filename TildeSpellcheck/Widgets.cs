@@ -41,15 +41,12 @@ internal static class Widgets
         return false;
     }
 
-    // Arguments run left to right, so Apply sees the value ImGui just wrote.
-    internal static bool Toggle<TState>(string label, bool value, TState state, Action<TState, bool> set) =>
-        Apply(ImGui.Checkbox(label, ref value), value, state, set);
-
-    private static bool Apply<TState, T>(bool changed, T value, TState state, Action<TState, T> set)
+    internal static bool Toggle<TState>(string label, bool value, TState state, Action<TState, bool> set)
     {
-        if (changed)
-            set(state, value);
+        if (!ImGui.Checkbox(label, ref value))
+            return false;
 
-        return changed;
+        set(state, value);
+        return true;
     }
 }
