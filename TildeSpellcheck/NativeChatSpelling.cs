@@ -481,11 +481,10 @@ internal sealed unsafe class NativeChatSpelling(Spelling spelling, SpellMenu spe
     private float ScrollOffset(AtkResNode* caret, string text, int cursor) =>
         Math.Max(0f, Width(text, Math.Min(cursor, text.Length)) - (ScreenRect(caret).X - _rect.X));
 
-    // TODO: Pieces only matter once another plugin raises the box past the game's 500 bytes, as TT does upstream
+    // Pieces only matter once another plugin raises the box past the game's 500 bytes, as Emote Splitter does.
     // GetTextDrawSize's width is a ushort, and 32000 characters run past 200,000 px
     // So a piece is...at most:
     // 2 * PieceChars - 1 = 511 characters, under 65,535 px while glyphs are under 128 px
-    // I'll fix this later I swear :pensive:
     private const int PieceChars = 256;
 
     private float Width(string text, int length)
