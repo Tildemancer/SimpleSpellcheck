@@ -63,37 +63,30 @@ internal sealed class Spelling
     {
         List<(int Index, int Length)> marks = [];
 
-        try
+        if (!Speller.Loaded || string.IsNullOrEmpty(text))
+            return marks;
+
+        var (from, to) = (CommandEndsAt(text), UnfinishedWordAt(text));
+
+        lock (_segments)
         {
-            if (!Speller.Loaded || string.IsNullOrEmpty(text))
-                return marks;
+            DropStale(_segments, ref _segmentsStamp, MostSegments);
+            var cached = _segments.GetAlternateLookup<ReadOnlySpan<char>>();
 
-            var (from, to) = (CommandEndsAt(text), UnfinishedWordAt(text));
-
-            lock (_segments)
+            for (int start = 0, end; start < text.Length; start = end)
             {
-                DropStale(_segments, ref _segmentsStamp, MostSegments);
-                var cached = _segments.GetAlternateLookup<ReadOnlySpan<char>>();
+                end = SegmentEnd(text, start);
 
-                for (int start = 0, end; start < text.Length; start = end)
+                if (!cached.TryGetValue(text.AsSpan(start, end - start), out var found))
                 {
-                    end = SegmentEnd(text, start);
-
-                    if (!cached.TryGetValue(text.AsSpan(start, end - start), out var found))
-                    {
-                        var segment = text[start..end];
-                        _segments[segment] = found = SpellCheck.Misspellings(segment, _settings.IgnoreWordsEndingInHyphen);
-                    }
-
-                    foreach (var (index, length) in found)
-                        if (start + index >= from && start + index < to)
-                            marks.Add((start + index, length));
+                    var segment = text[start..end];
+                    _segments[segment] = found = SpellCheck.Misspellings(segment, _settings.IgnoreWordsEndingInHyphen);
                 }
+
+                foreach (var (index, length) in found)
+                    if (start + index >= from && start + index < to)
+                        marks.Add((start + index, length));
             }
-        }
-        catch (Exception ex)
-        {
-            Svc.Log.Error(ex, "Spellcheck failed.");
         }
 
         return marks;
