@@ -6,13 +6,12 @@ using Dalamud.Interface.Utility.Raii;
 namespace SimpleSpellcheck;
 
 // The spelling menu's entries, drawn into the editbox menu.
-// Kept by menu id and word, so a menu's synonyms and corrections are asked for once.
+// Kept by menu id, so a menu's synonyms and corrections are only asked for once.
 internal sealed class SpellMenu(Spelling spelling, Action<string, string, Action<string>?> define)
 {
-    private sealed class Shown(int id, string word)
+    private sealed class Shown(int id)
     {
         internal readonly int Id = id;
-        internal readonly string Word = word;
         internal List<string>? Synonyms, Corrections;
     }
 
@@ -21,8 +20,8 @@ internal sealed class SpellMenu(Spelling spelling, Action<string, string, Action
     // True once it's done with the word and its been defined, added, ignored or replaced.
     internal bool Draw(int id, string word, bool misspelled, Action<string> replace)
     {
-        if (_shown is not { } shown || shown.Id != id || shown.Word != word)
-            _shown = shown = new(id, word);
+        if (_shown is not { } shown || shown.Id != id)
+            _shown = shown = new(id);
 
         ImGui.TextDisabled(word);
 
