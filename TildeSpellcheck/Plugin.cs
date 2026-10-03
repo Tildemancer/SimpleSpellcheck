@@ -36,8 +36,8 @@ public sealed class Plugin : IDalamudPlugin
         _config = Svc.Pi.GetPluginConfig() as Configuration ?? new Configuration();
 
         _define = new DefineWindow(_config, LexiconFolder);
-        _spelling = new Spelling(_config, Save, LexiconFolder, _define.Open);
-        _native = new NativeChatSpelling(_spelling);
+        _spelling = new Spelling(_config, Save, LexiconFolder);
+        _native = new NativeChatSpelling(_spelling, new SpellMenu(_spelling, _define.Open));
         _settings = new SettingsWindow(_config, Save, () => _ = Load())
         {
             SizeConstraints = new() { MinimumSize = new(400, 350), MaximumSize = new(9999, 9999) },

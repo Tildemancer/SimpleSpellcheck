@@ -11,17 +11,12 @@ internal sealed class Spelling
     private readonly Configuration _settings;
     private readonly Action _save;
     private readonly string _lexicon;
-    private readonly Action<string, string, Action<string>?> _openDefine;
 
-    internal SpellMenu Menu { get; }
-
-    internal Spelling(Configuration settings, Action save, string lexicon, Action<string, string, Action<string>?> define)
+    internal Spelling(Configuration settings, Action save, string lexicon)
     {
         _settings = settings;
         _save = save;
         _lexicon = lexicon;
-        _openDefine = define;
-        Menu = new SpellMenu(this);
     }
 
     private static int UnfinishedWordAt(string text)
@@ -200,8 +195,6 @@ internal sealed class Spelling
             Svc.Log.Error(ex, "Saving the added word failed.");
         }
     }
-
-    internal void Define(string word, string original, Action<string>? use) => _openDefine(word, original, use);
 
     private const int MostSynonyms = 10;
 

@@ -13,7 +13,7 @@ using Lumina.Text.ReadOnly;
 
 namespace SimpleSpellcheck;
 
-internal sealed unsafe class NativeChatSpelling(Spelling spelling)
+internal sealed unsafe class NativeChatSpelling(Spelling spelling, SpellMenu spellMenu)
 {
     // ABGR: red
     private const uint Color = 0xFF4040FFu;
@@ -406,7 +406,7 @@ internal sealed unsafe class NativeChatSpelling(Spelling spelling)
 
     private void DrawMenuItems()
     {
-        if (spelling.Menu.Draw(_menuId, _pendingWord, _pendingMisspelled, _replace))
+        if (spellMenu.Draw(_menuId, _pendingWord, _pendingMisspelled, _replace))
             Forget();
     }
 

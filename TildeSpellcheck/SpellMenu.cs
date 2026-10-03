@@ -7,7 +7,7 @@ namespace SimpleSpellcheck;
 
 // The spelling menu's entries, drawn into the editbox menu.
 // Kept by menu id and word, so a menu's synonyms and corrections are asked for once.
-internal sealed class SpellMenu(Spelling spelling)
+internal sealed class SpellMenu(Spelling spelling, Action<string, string, Action<string>?> define)
 {
     private sealed class Shown(int id, string word)
     {
@@ -42,14 +42,14 @@ internal sealed class SpellMenu(Spelling spelling)
             foreach (var synonym in shown.Synonyms)
                 if (ImGui.Selectable(synonym))
                 {
-                    spelling.Define(synonym, word, replace);
+                    define(synonym, word, replace);
                     return true;
                 }
         }
 
         if (ImGui.Selectable("Define##entry"))
         {
-            spelling.Define(word, word, replace);
+            define(word, word, replace);
             return true;
         }
 
