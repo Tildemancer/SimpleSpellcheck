@@ -150,7 +150,7 @@ internal sealed class Spelling
     // The menus ask again each frame that it's null.
     internal List<string>? Suggest(string word)
     {
-        if (!Speller.Loaded || string.IsNullOrWhiteSpace(word))
+        if (!Speller.Loaded)
             return [];
 
         lock (_suggesting)
@@ -183,7 +183,7 @@ internal sealed class Spelling
         if (!Speller.AddWord(word))
             return;
 
-        _settings.CustomWords.Add(word.Trim());
+        _settings.CustomWords.Add(word);
 
         // A failed save is only logged, the word is in already and the next save writes it
         try

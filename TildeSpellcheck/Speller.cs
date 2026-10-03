@@ -144,10 +144,8 @@ internal static class Speller
 
     internal static bool IsWord(string word)
     {
-        var trimmed = word.Trim();
-
         using (Reading())
-            return Known(trimmed) || trimmed.Split('-', '–', '—') is { Length: > 1 } halves && halves.All(half => half.Length == 0 || Known(half));
+            return Known(word) || word.Split('-', '–', '—') is { Length: > 1 } halves && halves.All(half => half.Length == 0 || Known(half));
     }
 
     // Names never go into the lists, so for a name this is either the dictionaries' word or the user's.
@@ -169,21 +167,17 @@ internal static class Speller
     internal static List<string> Suggest(string word, int limit)
     {
         using (Reading())
-            return _primary is null || word.Length == 0 ? [] : Rank(word, _primary.Suggest(word), _alternate!.Suggest(word), limit);
+            return _primary is null ? [] : Rank(word, _primary.Suggest(word), _alternate!.Suggest(word), limit);
     }
 
     internal static bool AddWord(string word)
     {
-        var trimmed = word.Trim();
-        if (trimmed.Length == 0)
-            return false;
-
         using (Writing())
         {
-            if (!_custom.Add(trimmed))
+            if (!_custom.Add(word))
                 return false;
 
-            Introduce(trimmed, _inserted);
+            Introduce(word, _inserted);
             Generation++;
         }
 
@@ -192,15 +186,13 @@ internal static class Speller
 
     internal static void RemoveWord(string word)
     {
-        var trimmed = word.Trim();
-
         using (Writing())
         {
-            _ = _custom.Remove(trimmed);
+            _ = _custom.Remove(word);
 
             // A game word stays, but a name is never a correction.
-            if (_inserted.Remove(trimmed) && (!_game.Contains(trimmed) || _gameNames.Contains(trimmed)))
-                _ = _primary?.Remove(trimmed);
+            if (_inserted.Remove(word) && (!_game.Contains(word) || _gameNames.Contains(word)))
+                _ = _primary?.Remove(word);
 
             Generation++;
         }
@@ -208,13 +200,9 @@ internal static class Speller
 
     internal static void Ignore(string word)
     {
-        var trimmed = word.Trim();
-        if (trimmed.Length == 0)
-            return;
-
         using (Writing())
         {
-            _ = _ignored.Add(trimmed);
+            _ = _ignored.Add(word);
             Generation++;
         }
     }
