@@ -50,7 +50,7 @@ internal sealed partial class DefineWindow : Window
     // Compared by reference, the keys are the Answer's own strings and stay the same each frame.
     private readonly Dictionary<string, string[]> _words = new(ReferenceEqualityComparer.Instance);
 
-    private const string Id = "###tildespellcheck-define";
+    private const string Id = "###simplespellcheck-define";
 
     internal DefineWindow(Configuration settings, string lexicon)
         : base(Id)

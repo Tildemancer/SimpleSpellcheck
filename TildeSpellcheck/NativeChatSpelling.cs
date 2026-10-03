@@ -379,7 +379,7 @@ internal sealed unsafe class NativeChatSpelling(Spelling spelling, SpellMenu spe
         private readonly NativeChatSpelling _owner;
 
         internal MenuWindow(NativeChatSpelling owner)
-            : base("##tildespellcheck-native-spelling",
+            : base("##simplespellcheck-native-spelling",
                 ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoNav)
         {
             _owner = owner;
