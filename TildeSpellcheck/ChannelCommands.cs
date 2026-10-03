@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace SimpleSpellcheck;
 
-internal static partial class ChannelCommands
+internal static class ChannelCommands
 {
     private static HashSet<string> TellNames = new(["tell", "t"], StringComparer.OrdinalIgnoreCase);
 
@@ -26,9 +25,6 @@ internal static partial class ChannelCommands
     }
 
     // A /t or /tell, whether or not its target reads as a name.
-    internal static bool IsTell(string line) =>
-        CommandRegex().Match(line) is { Success: true } match && TellNames.Contains(match.Groups["cmd"].Value);
-
-    [GeneratedRegex(@"^/(?<cmd>\p{L}+[0-9]*)(?:\s+(?<rest>.*))?$", RegexOptions.Singleline)]
-    private static partial Regex CommandRegex();
+    // A null separator splits at any whitespace, including the full width space.
+    internal static bool IsTell(string line) => line.StartsWith('/') && TellNames.Contains(line[1..].Split(null, 2)[0]);
 }
