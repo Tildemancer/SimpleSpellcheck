@@ -25,9 +25,6 @@ internal static partial class ChannelCommands
         TellNames = tells;
     }
 
-    // 0x02/0x03 frame links and auto-translate phrases.
-    internal static bool HasPayload(string line) => line.AsSpan().ContainsAny('\x02', '\x03');
-
     // A /t or /tell, whether or not its target reads as a name.
     internal static bool IsTell(string line) =>
         CommandRegex().Match(line) is { Success: true } match && TellNames.Contains(match.Groups["cmd"].Value);
