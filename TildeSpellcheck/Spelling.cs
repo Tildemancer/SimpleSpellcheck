@@ -6,7 +6,7 @@ using Stamp = (int Generation, bool Hyphen, int Suggestions);
 
 namespace SimpleSpellcheck;
 
-internal sealed class Spelling : IDisposable
+internal sealed class Spelling
 {
     private readonly Configuration _settings;
     private readonly Action _save;
@@ -15,8 +15,6 @@ internal sealed class Spelling : IDisposable
 
     internal SpellMenu Menu { get; }
 
-    internal event Action? Changed;
-
     internal Spelling(Configuration settings, Action save, string lexicon, Action<string, string, Action<string>?> define)
     {
         _settings = settings;
@@ -24,21 +22,6 @@ internal sealed class Spelling : IDisposable
         _lexicon = lexicon;
         _openDefine = define;
         Menu = new SpellMenu(this);
-
-        Svc.Pi.UiBuilder.Draw += Announce;
-    }
-
-    private Stamp _announced;
-
-    // The chatbox drops its cached marks on Changed.
-    // Sent from gamethread Draw where it reads those caches.
-    private void Announce()
-    {
-        if (Current == _announced)
-            return;
-
-        _announced = Current;
-        Changed?.Invoke();
     }
 
     private static int UnfinishedWordAt(string text)
@@ -121,7 +104,7 @@ internal sealed class Spelling : IDisposable
         return marks;
     }
 
-    private Stamp Current => (Speller.Generation, _settings.IgnoreWordsEndingInHyphen, _settings.MaximumSuggestions);
+    internal Stamp Current => (Speller.Generation, _settings.IgnoreWordsEndingInHyphen, _settings.MaximumSuggestions);
 
     private void DropStale<T>(Dictionary<string, T> cache, ref Stamp stamp, int most)
     {
@@ -232,6 +215,4 @@ internal sealed class Spelling : IDisposable
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Take(MostSynonyms),
     ];
-
-    public void Dispose() => Svc.Pi.UiBuilder.Draw -= Announce;
 }

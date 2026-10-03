@@ -42,7 +42,6 @@ public sealed class Plugin : IDalamudPlugin
         {
             SizeConstraints = new() { MinimumSize = new(400, 350), MaximumSize = new(9999, 9999) },
         };
-        _spelling.Changed += _native.Recheck;
 
         _windows.AddWindow(_define);
         _windows.AddWindow(_native.Menu);
@@ -111,9 +110,7 @@ public sealed class Plugin : IDalamudPlugin
         Svc.Pi.UiBuilder.OpenConfigUi -= _settings.Toggle;
         Svc.Pi.UiBuilder.OpenMainUi -= _define.OpenSearch;
 
-        _spelling.Changed -= _native.Recheck;
         _windows.RemoveAllWindows();
-        _spelling.Dispose();
         GameVocabulary.Forget();
         Speller.Unload();
     }
