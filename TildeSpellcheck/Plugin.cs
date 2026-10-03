@@ -38,7 +38,10 @@ public sealed class Plugin : IDalamudPlugin
         _define = new DefineWindow(_config, LexiconFolder);
         _spelling = new Spelling(_config, Save, LexiconFolder, _define.Open);
         _native = new NativeChatSpelling(_spelling);
-        _settings = new SettingsWindow(_config, Save, () => _ = Load());
+        _settings = new SettingsWindow(_config, Save, () => _ = Load())
+        {
+            SizeConstraints = new() { MinimumSize = new(400, 350), MaximumSize = new(9999, 9999) },
+        };
         _spelling.Changed += _native.Recheck;
 
         _windows.AddWindow(_define);
