@@ -320,7 +320,6 @@ internal sealed unsafe class NativeChatSpelling(Spelling spelling, SpellMenu spe
     }
 
     // Spelling.Marks come in text order, ergo their widths do too.
-    // Posterity; former ipc
     private int FirstShowing(string text, List<(int Start, int Length)> marks)
     {
         var (low, high) = (0, marks.Count);

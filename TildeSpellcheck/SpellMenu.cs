@@ -5,7 +5,7 @@ using Dalamud.Interface.Utility.Raii;
 
 namespace SimpleSpellcheck;
 
-// The spelling menu's entries, drawn into the editbox menu.
+// Draws the spelling menu's entries into NativeChatSpelling's MenuWindow.
 // Kept by menu id, so a menu's synonyms and corrections are only asked for once.
 internal sealed class SpellMenu(Spelling spelling, Action<string, string, Action<string>?> define)
 {

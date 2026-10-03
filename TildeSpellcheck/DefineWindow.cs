@@ -70,8 +70,7 @@ internal sealed partial class DefineWindow : Window
         _target = use is null ? null : (original, use);
         _back.Clear();
 
-        // Already open, it can sit behind the chat window that asked for it (example, if the user moves the window).
-        // I'm actually not super satisfied with this and might force it to always be at the front in a later release. That, or close it when the window is moved.
+        // It can be behind another window if it's already open.
         BringToFront();
         word = Lexicon.Bare(word);
 
@@ -90,7 +89,7 @@ internal sealed partial class DefineWindow : Window
             WindowName = "Look up" + Id;
     }
 
-    // A hosted plugin's callback, dropped with the window.
+    // The chatbox's Replace drops with the window.
     public override void OnClose() => _target = null;
 
     private void Follow(string word)
@@ -180,7 +179,7 @@ internal sealed partial class DefineWindow : Window
         // An id with the word, so each word's lines start closed however the last ones were left.
         string[] bars = [.. entries.Select((e, i) => $"Potentially NSFW ({e.Senses.Count - closed[i]})###senses-{word}"), $"Potentially NSFW ({shut.Length})###synonyms-{word}"];
 
-        var missing = leftOut ? "Excluded; Politics" : $"No definition for \"{word}\"{(online ? ", here or on Wiktionary." : ". Looking online is off on the Spelling tab.")}";
+        var missing = leftOut ? "Excluded; Politics" : $"No definition for \"{word}\"{(online ? ", here or on Wiktionary." : ". Looking words up online is off in /spellcheck.")}";
 
         return new Answer(entries, closed, bars, missing, open, string.Join(", ", shut), name is { } known ? Describe(known, stem) : null, credit);
     }

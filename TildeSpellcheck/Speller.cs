@@ -8,7 +8,7 @@ using WeCantSpell.Hunspell;
 
 namespace SimpleSpellcheck;
 
-// All under _sync, filled from background threads while the boxes check on the draw thread.
+// All under _sync, filled from background threads while the chat box checks on the draw thread.
 internal static class Speller
 {
     // Checks and Suggest share it, so a Suggest's 100 ms and more doesn't hold up a check on the draw thread.
@@ -63,11 +63,11 @@ internal static class Speller
 
     internal static int Generation { get; private set; }
 
-    // No lock since the menus ask every frame.
+    // No lock since the spelling menu asks every frame...
     internal static bool Loaded => Volatile.Read(ref _primary) is not null;
 
     // Both lists take ~150 ms.
-    // Not published after an Unload. Otherwise, a stale load holds ~20 MB with the module off.
+    // Not published after an Unload, any load still running @ Dispose would publish ~20 MB into its statics.
     internal static Task<string?> Load(string directory, bool british, IEnumerable<string> custom, IEnumerable<string> accepted)
     {
         int token;

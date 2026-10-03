@@ -140,7 +140,7 @@ internal sealed class Spelling
 
     private const int MostSuggesting = 64;
 
-    // The menus ask again each frame that it's null.
+    // The spelling menu asks again each frame that it's null.
     internal List<string>? Suggest(string word)
     {
         if (!Speller.Loaded)
