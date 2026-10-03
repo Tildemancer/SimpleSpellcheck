@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 internal static partial class ChannelCommands
 {

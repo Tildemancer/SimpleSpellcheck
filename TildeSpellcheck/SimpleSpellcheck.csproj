@@ -7,7 +7,7 @@
     <Platforms>x64</Platforms>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>$(MSBuildProjectDirectory)\..\build\TildeSpellcheck</OutputPath>
+    <OutputPath>$(MSBuildProjectDirectory)\..\build\SimpleSpellcheck</OutputPath>
   </PropertyGroup>
 
   <!--
@@ -31,7 +31,7 @@
 
   <PropertyGroup>
     <Author>Tildemancer</Author>
-    <Name>TildeSpellcheck</Name>
+    <Name>Simple Spellcheck</Name>
     <Punchline>Spellcheck for the chat box.</Punchline>
     <Description>Underlines misspellings in the chat box, with corrections on right-click. It knows the game's words. Right-click any word to define it or find its synonyms.</Description>
     <Tags>Social;Utility;Roleplay</Tags>

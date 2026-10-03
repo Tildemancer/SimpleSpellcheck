@@ -4,9 +4,9 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
-internal sealed class SettingsWindow(Configuration settings, Action save, Action reload) : Window("TildeSpellcheck###tildespellcheck-settings")
+internal sealed class SettingsWindow(Configuration settings, Action save, Action reload) : Window("Simple Spellcheck###simplespellcheck-settings")
 {
     private int _suggestions = -1;
 

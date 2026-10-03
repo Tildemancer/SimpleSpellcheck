@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dalamud.Configuration;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 [Serializable]
 public sealed class Configuration : IPluginConfiguration

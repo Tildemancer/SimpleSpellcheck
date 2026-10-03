@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 // The spelling menu's entries, drawn into the editbox menu.
 // Kept by menu id and word, so a menu's synonyms and corrections are asked for once.

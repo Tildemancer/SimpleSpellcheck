@@ -10,7 +10,7 @@ using Dalamud.Interface.Windowing;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 internal sealed unsafe class NativeChatSpelling(Spelling spelling)
 {
@@ -200,7 +200,7 @@ internal sealed unsafe class NativeChatSpelling(Spelling spelling)
             _off = true;
             Svc.Log.Error(ex, "Marking the game's chat box failed repeatedly; it is now off.");
             Svc.Chat.Print(
-                "[TildeSpellcheck] Spellchecking the game's chat box has switched itself off after " +
+                "[Simple Spellcheck] Spellchecking the game's chat box has switched itself off after " +
                 "repeated errors. Reload the plugin to try again; /xllog has the detail.");
         }
     }

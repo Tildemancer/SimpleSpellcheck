@@ -8,14 +8,14 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Lumina.Excel.Sheets;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    private static readonly string[] CommandNames = ["/spelling", "/spell", "/tspell", "/tspelling"];
+    private static readonly string[] CommandNames = ["/spellcheck", "/ss", "/scheck", "/spelling", "/sspell", "/spell"];
 
     private readonly Configuration _config;
-    private readonly WindowSystem _windows = new("TildeSpellcheck");
+    private readonly WindowSystem _windows = new("SimpleSpellcheck");
     private readonly DefineWindow _define;
     private readonly Spelling _spelling;
     private readonly NativeChatSpelling _native;
@@ -58,7 +58,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             var info = new CommandInfo(OnCommand)
             {
-                HelpMessage = "Open TildeSpellcheck\n/spelling define - Look a word up\n/spelling define <word> - Define that word",
+                HelpMessage = "Open Simple Spellcheck\n/spellcheck define - Look a word up\n/spellcheck define <word> - Define that word",
                 ShowInHelp = name == CommandNames[0],
             };
 

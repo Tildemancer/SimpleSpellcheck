@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using WeCantSpell.Hunspell;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 // All under _sync, filled from background threads while the boxes check on the draw thread.
 internal static class Speller

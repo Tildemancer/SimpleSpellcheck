@@ -1,7 +1,7 @@
 using System;
 using Dalamud.Bindings.ImGui;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 internal static class Widgets
 {

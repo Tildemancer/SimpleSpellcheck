@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 // Only with LookUpOnline on, see DefineWindow.Look
 internal static partial class Wiktionary
@@ -16,7 +16,7 @@ internal static partial class Wiktionary
 
     // Wikimedia asks every client to identify itself and leave a calling card, so we sign with the GitHub.
     static Wiktionary() =>
-        Client.DefaultRequestHeaders.UserAgent.ParseAdd($"TildeSpellcheck/{typeof(Wiktionary).Assembly.GetName().Version?.ToString(3)} (https://github.com/Tildemancer/TildeSpellcheck)");
+        Client.DefaultRequestHeaders.UserAgent.ParseAdd($"SimpleSpellcheck/{typeof(Wiktionary).Assembly.GetName().Version?.ToString(3)} (https://github.com/Tildemancer/TildeSpellcheck)");
 
     // Page names are case-sensitive, so paris and Paris are two pages and "Callipygian" is a 404.
     internal static async Task<List<Entry>> Define(string word)

@@ -8,7 +8,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 internal sealed partial class DefineWindow : Window
 {

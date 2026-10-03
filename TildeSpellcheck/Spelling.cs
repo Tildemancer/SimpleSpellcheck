@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Stamp = (int Generation, bool Hyphen, int Suggestions);
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 internal sealed class Spelling : IDisposable
 {

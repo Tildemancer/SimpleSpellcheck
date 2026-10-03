@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 internal static class SpellCheck
 {

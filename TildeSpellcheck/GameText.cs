@@ -10,10 +10,10 @@ using Lumina.Data.Files.Excel;
 using Lumina.Data.Structs.Excel;
 using Lumina.Extensions;
 using Lumina.Text.ReadOnly;
-using Origins = System.Collections.Generic.Dictionary<string, TildeSpellcheck.GameName>.AlternateLookup<System.ReadOnlySpan<char>>;
+using Origins = System.Collections.Generic.Dictionary<string, SimpleSpellcheck.GameName>.AlternateLookup<System.ReadOnlySpan<char>>;
 using Seen = System.Collections.Generic.Dictionary<string, (int Count, int Shortest, int Proper, int Lower)>.AlternateLookup<System.ReadOnlySpan<char>>;
 
-namespace TildeSpellcheck;
+namespace SimpleSpellcheck;
 
 // Names are considered to be "words the game capitalizes where a capital means something and hardly ever lowercases", and whole names for a phrase looked up.
 internal readonly record struct GameWords(List<string> Words, Dictionary<string, GameName> Names);
