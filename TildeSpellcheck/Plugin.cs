@@ -113,5 +113,6 @@ public sealed class Plugin : IDalamudPlugin
         _windows.RemoveAllWindows();
         GameVocabulary.Forget();
         Speller.Unload();
+        Wiktionary.Dispose();
     }
 }
