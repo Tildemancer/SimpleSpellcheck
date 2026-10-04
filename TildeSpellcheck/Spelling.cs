@@ -63,30 +63,27 @@ internal sealed class Spelling
     {
         List<(int Index, int Length)> marks = [];
 
-        if (!Speller.Loaded || string.IsNullOrEmpty(text))
+        if (!Speller.Loaded)
             return marks;
 
         var (from, to) = (CommandEndsAt(text), UnfinishedWordAt(text));
 
-        lock (_segments)
+        DropStale(_segments, ref _segmentsStamp, MostSegments);
+        var cached = _segments.GetAlternateLookup<ReadOnlySpan<char>>();
+
+        for (int start = 0, end; start < text.Length; start = end)
         {
-            DropStale(_segments, ref _segmentsStamp, MostSegments);
-            var cached = _segments.GetAlternateLookup<ReadOnlySpan<char>>();
+            end = SegmentEnd(text, start);
 
-            for (int start = 0, end; start < text.Length; start = end)
+            if (!cached.TryGetValue(text.AsSpan(start, end - start), out var found))
             {
-                end = SegmentEnd(text, start);
-
-                if (!cached.TryGetValue(text.AsSpan(start, end - start), out var found))
-                {
-                    var segment = text[start..end];
-                    _segments[segment] = found = SpellCheck.Misspellings(segment, _settings.IgnoreWordsEndingInHyphen);
-                }
-
-                foreach (var (index, length) in found)
-                    if (start + index >= from && start + index < to)
-                        marks.Add((start + index, length));
+                var segment = text[start..end];
+                _segments[segment] = found = SpellCheck.Misspellings(segment, _settings.IgnoreWordsEndingInHyphen);
             }
+
+            foreach (var (index, length) in found)
+                if (start + index >= from && start + index < to)
+                    marks.Add((start + index, length));
         }
 
         return marks;
@@ -146,15 +143,12 @@ internal sealed class Spelling
         if (!Speller.Loaded)
             return [];
 
-        lock (_suggesting)
-        {
-            DropStale(_suggesting, ref _suggestingStamp, MostSuggesting);
+        DropStale(_suggesting, ref _suggestingStamp, MostSuggesting);
 
-            if (!_suggesting.TryGetValue(word, out var lookup))
-                _suggesting[word] = lookup = Task.Run(() => Lookup(word, _settings.MaximumSuggestions));
+        if (!_suggesting.TryGetValue(word, out var lookup))
+            _suggesting[word] = lookup = Task.Run(() => Lookup(word, _settings.MaximumSuggestions));
 
-            return lookup.IsCompleted ? lookup.Result : null;
-        }
+        return lookup.IsCompleted ? lookup.Result : null;
     }
 
     // Never throws so the menu reading its task's Result doesn't either

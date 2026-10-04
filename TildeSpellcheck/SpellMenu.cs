@@ -26,7 +26,7 @@ internal sealed class SpellMenu(Spelling spelling, Action<string, string, Action
         ImGui.TextDisabled(word);
 
         // ##entry keeps an entry's id apart from a correction's, so you can correct 'defin' to 'Define' without tainting.
-        if (ImGui.Selectable("Synonyms##entry", false, ImGuiSelectableFlags.DontClosePopups))
+        if (ImGui.Selectable("Synonyms##entry"))
             shown.Synonyms = shown.Synonyms is null ? spelling.Synonyms(word) : null;
 
         if (shown.Synonyms is not null)
