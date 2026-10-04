@@ -37,6 +37,7 @@ internal sealed class SettingsWindow(Configuration settings, Action save, Action
         ImGui.Separator();
         ImGui.TextUnformatted("Define and synonyms");
         ImGui.TextDisabled("Right-click any word in the chat box.");
+        ImGui.TextDisabled("Insert opens the same menu from the keyboard at the caret.");
 
         if (Widgets.Toggle("Look a word up online when the bundled definitions lack it", settings.LookUpOnline, settings, static (s, v) => s.LookUpOnline = v))
             save();
