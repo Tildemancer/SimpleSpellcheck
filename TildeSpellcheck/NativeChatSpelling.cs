@@ -445,6 +445,14 @@ internal sealed unsafe class NativeChatSpelling(Spelling spelling, SpellMenu spe
 
         var line = text[..at] + replacement + text[(at + word.Length)..];
 
+        // SetText cuts the component's text at MaxByte, but the focused copy written below takes the line whole.
+        // The next key puts that copy back in the box. very no bueno.
+        if (Encoding.UTF8.GetByteCount(line) > input->ComponentTextData.MaxByte)
+        {
+            Svc.Chat.Print($"[Simple Spellcheck] \"{replacement}\" would take the line past the chat box's limit, so nothing was changed.");
+            return;
+        }
+
         // Where it was before the menu, moved by the length change when it was past the word
         var caret = _caretAtOpen < 0 || _caretAtOpen > text.Length ? line.Length
             : _caretAtOpen <= at ? _caretAtOpen
