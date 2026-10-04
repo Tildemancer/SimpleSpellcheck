@@ -35,6 +35,7 @@
     <Punchline>Spellcheck for the chat box.</Punchline>
     <Description>Underlines misspellings in the chat box, with corrections on right-click. It knows the game's words. Right-click any word to define it or find its synonyms.</Description>
     <Tags>Social;Utility;Roleplay</Tags>
+    <IconUrl>https://raw.githubusercontent.com/Tildemancer/SimpleSpellcheck/master/images/icon.png</IconUrl>
   </PropertyGroup>
 
 </Project>
